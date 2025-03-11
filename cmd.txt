@@ -1,0 +1,11 @@
+client:
+
+request_all_item_cost [session_id]
+buy [product_id] [product_count] [session_id]
+remove [product_id] [session_id]
+pay [order_sum] [session_id]
+
+server:
+
+response_all_item_cost [product_id] [product_cost] [session_id]
+order [order_id] [session_id]
