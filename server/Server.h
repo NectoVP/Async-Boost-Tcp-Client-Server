@@ -1,13 +1,17 @@
 #pragma once
 #include <iostream>
+#include <deque>
+#include <future>
+#include <shared_mutex>
+
 #include <boost/asio/thread_pool.hpp>
 #include <boost/asio/post.hpp>
 #include <boost/asio/use_future.hpp>
 #include <boost/asio/packaged_task.hpp>
 #include <boost/lockfree/queue.hpp>
-#include <deque>
-#include <future>
-#include <shared_mutex>
+
+#include "json.hpp"
+
 #include "ItemHolder.h"
 #include "KitchenWorker.h"
 
@@ -31,10 +35,12 @@ public:
         , kitchenWorker(kitchenWorker)
         , boughtItems(std::make_shared<std::unordered_map<SessionId, std::unordered_map<ItemId, size_t, ItemIdHash>, SessionIdHash>>()) {}
     
-    std::future<void> Buy(size_t productId, size_t productCount, size_t sessionId);
-    std::future<int> Remove(size_t productId, size_t sessionId);
+    std::future<void> Buy(size_t itemId, size_t itemCount, size_t sessionId);
+    std::future<int> Remove(size_t itemId, size_t sessionId);
     std::future<bool> Pay(size_t order_sum, size_t sessionId);
-    std::future<void> MakeOrder(size_t sessionId);
+    std::future<void> MakeOrder(size_t order_sum, size_t sessionId);
+
+    bool CheckOrderCost(size_t order_sum, size_t sessionId);
 
     void Wait();
     void Join();

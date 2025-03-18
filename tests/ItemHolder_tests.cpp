@@ -10,13 +10,13 @@ struct ItemHolderTest : public testing::Test {
 };
 
 TEST_F(ItemHolderTest, ItemCount) {
-    ASSERT_EQ(itemHolder->GetItems()->size(), 6);
+    ASSERT_EQ(itemHolder->GetItemsDescription()->size(), 20);
 }
 
 TEST_F(ItemHolderTest, ItemCost) {
-    ASSERT_EQ((*itemHolder->GetItems())[ItemId(3)].cost, 150);
+    ASSERT_EQ((*itemHolder->GetItemsDescription())[ItemId(3)].cost, 150);
 }
 
 TEST_F(ItemHolderTest, ItemCookingTime) {
-    ASSERT_EQ((*itemHolder->GetItems())[ItemId(6)].cooking_time, 200);
+    ASSERT_EQ((*itemHolder->GetItemsDescription())[ItemId(6)].cooking_time, 200);
 }

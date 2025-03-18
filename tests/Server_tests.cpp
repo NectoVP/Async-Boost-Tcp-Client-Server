@@ -180,7 +180,7 @@ TEST_F(ServerTest, CompleteOrderSingleSession) {
     
     auto e = server->Pay(500, 1);
     e.wait();
-    auto f = server->MakeOrder(1);
+    auto f = server->MakeOrder(500, 1);
     f.wait();
 
     ASSERT_EQ(e.get(), true);

@@ -8,6 +8,7 @@ add_library(${PROJECT_NAME}
             KitchenWorker.cpp
             Server.h
             Server.cpp
+            json.hpp
 )
 
 find_package(Boost REQUIRED)
