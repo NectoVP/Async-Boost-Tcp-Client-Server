@@ -33,39 +33,23 @@ int main()
     auto kitchenWorker = std::make_shared<KitchenWorker>();
     std::shared_ptr<Server> server = std::make_shared<Server>(itemHolder, kitchenWorker);
     auto start = std::chrono::high_resolution_clock::now();
-    //for (auto i : test_input) {
-    //    auto splits = split_str(i);
-    //    if(splits[0] == "buy") {
-    //        auto f = server->Buy(std::stoi(splits[1]), std::stoi(splits[2]), std::stoi(splits[3]));
-    //        //f.wait();
-    //    }
-    //    if(splits[0] == "remove") {
-    //        auto f = server->Remove(std::stoi(splits[1]), std::stoi(splits[2]));
-    //        //f.wait();
-    //    }
-    //    if(splits[0] == "pay") {
-    //        //auto f = server->Pay(std::stoi(splits[1]), std::stoi(splits[2]));
-    //        //f.wait();
-    //        //if(f.get()) {
-    //        //    auto ff = server->MakeOrder(std::stoi(splits[2]));
-    //        //    ff.wait();
-    //        //}
-    //        auto f = server->MakeOrder(std::stoi(splits[1]), std::stoi(splits[2]));
-    //    }
-    //}
-//
+    for (auto i : test_input) {
+        auto splits = split_str(i);
+        if(splits[0] == "buy") {
+            auto f = server->Buy(std::stoi(splits[1]), std::stoi(splits[2]), std::stoi(splits[3]));
+        }
+        if(splits[0] == "remove") {
+            auto f = server->Remove(std::stoi(splits[1]), std::stoi(splits[2]));
+        }
+        if(splits[0] == "pay") {
+            auto f = server->MakeOrder(std::stoi(splits[1]), std::stoi(splits[2]));
+        }
+    }
+
     server->Join();
     server->Stop();
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-    //std::cout << duration.count() << std::endl;
-    
-    std::vector<std::thread> vec;
-    auto foo = [](int i){std::cout << i << std::endl; };
-    vec.emplace_back(std::thread(foo, 1));
-    vec.emplace_back(std::thread(foo, 2));
-    vec.emplace_back(std::thread(foo, 3));
-    for(auto& i : vec)
-        i.join();
+    std::cout << duration.count() << std::endl;
     return 0;
 }

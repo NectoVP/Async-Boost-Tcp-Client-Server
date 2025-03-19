@@ -126,10 +126,6 @@ TEST_F(ServerTest, ItemPaySingleSession) {
     auto d = server->Remove(1, 1);
     d.wait();
     
-    auto e = server->Pay(500, 1);
-    e.wait();
-
-    ASSERT_EQ(e.get(), true);
     ASSERT_EQ(d.get(), 0);
 }
 
@@ -144,10 +140,6 @@ TEST_F(ServerTest, ItemOverPaySingleSession) {
     auto d = server->Remove(1, 1);
     d.wait();
     
-    auto e = server->Pay(600, 1);
-    e.wait();
-
-    ASSERT_EQ(e.get(), false);
     ASSERT_EQ(d.get(), 0);
 }
 
@@ -161,10 +153,6 @@ TEST_F(ServerTest, ItemUnderPaySingleSession) {
     auto d = server->Remove(1, 1);
     d.wait();
     
-    auto e = server->Pay(400, 1);
-    e.wait();
-
-    ASSERT_EQ(e.get(), false);
     ASSERT_EQ(d.get(), 0);
 }
 
@@ -178,12 +166,9 @@ TEST_F(ServerTest, CompleteOrderSingleSession) {
     auto d = server->Remove(1, 1);
     d.wait();
     
-    auto e = server->Pay(500, 1);
-    e.wait();
     auto f = server->MakeOrder(500, 1);
     f.wait();
 
-    ASSERT_EQ(e.get(), true);
     ASSERT_EQ(d.get(), 0);
     ASSERT_EQ((*server->GetBoughtItemsTesTing()).find(SessionId(1)), (*server->GetBoughtItemsTesTing()).end());
 }

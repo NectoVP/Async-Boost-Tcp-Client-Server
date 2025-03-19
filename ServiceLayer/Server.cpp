@@ -44,27 +44,6 @@ std::future<int> Server::Remove(size_t itemId, size_t sessionId) {
     
 }
 
-std::future<bool> Server::Pay(size_t order_sum, size_t sessionId) {
-    std::future<bool> f = boost::asio::post(threadPool,
-        std::packaged_task<bool()>(
-            [server = shared_from_this(), order_sum, sessionId]() {
-                size_t temp_sum = 0;
-                std::shared_lock<std::shared_mutex> shar_lock(server->bying_removing_mutex);
-                auto item_costs = server->itemHolder->GetItemsDescription();
-                for(auto& [itemId, amount]: (*server->boughtItems)[sessionId])
-                    temp_sum += (*item_costs)[itemId].cost * amount;
-                if(temp_sum != order_sum) {
-                    std::cout << "payment provided is not sufficient\n";
-                    return false;
-                }
-                return true;
-            }
-        )
-    );
-
-    return f;
-}
-
 std::future<void> Server::MakeOrder(size_t order_sum, size_t sessionId) {
     std::future<void> f = boost::asio::post(threadPool,
         std::packaged_task<void()>(

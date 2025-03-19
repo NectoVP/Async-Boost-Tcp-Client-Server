@@ -26,7 +26,6 @@ public:
     
     std::future<void> Buy(size_t itemId, size_t itemCount, size_t sessionId);
     std::future<int> Remove(size_t itemId, size_t sessionId);
-    std::future<bool> Pay(size_t order_sum, size_t sessionId);
     std::future<void> MakeOrder(size_t order_sum, size_t sessionId);
 
     bool CheckOrderCost(size_t order_sum, size_t sessionId);
@@ -40,9 +39,11 @@ public:
         return boughtItems;
     }
 
-    private:
+private:
     boost::asio::thread_pool threadPool;
     std::shared_mutex bying_removing_mutex;
+    std::shared_mutex sessionThreadMutex;
+    std::shared_ptr<std::unordered_map<SessionId, std::vector<std::thread>>> sessionThreads;
     std::shared_ptr<ItemHolder> itemHolder;
     std::shared_ptr<KitchenWorker> kitchenWorker;
     std::shared_ptr<std::unordered_map<SessionId, std::unordered_map<ItemId, size_t>>> boughtItems;  
