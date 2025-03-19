@@ -2,7 +2,7 @@
 #include <unordered_set>
 #include <algorithm>
 #include <gtest/gtest.h>
-#include "../server/Server.h"
+#include "../ServiceLayer/Server.h"
 
 struct ServerTest : public testing::Test {
     ServerTest() : itemHolder(std::make_shared<ItemHolder>("/home/nectovp/Code/cpp/mpp/"))

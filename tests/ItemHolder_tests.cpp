@@ -2,7 +2,7 @@
 #include <unordered_set>
 #include <algorithm>
 #include <gtest/gtest.h>
-#include "../server/ItemHolder.h"
+#include "../DataLayer/ItemHolder.h"
 
 struct ItemHolderTest : public testing::Test {
     ItemHolderTest() : itemHolder(std::make_shared<ItemHolder>("/home/nectovp/Code/cpp/mpp/")) { }

@@ -10,21 +10,10 @@
 #include <boost/asio/packaged_task.hpp>
 #include <boost/lockfree/queue.hpp>
 
-#include "json.hpp"
-
-#include "ItemHolder.h"
+#include "../DataLayer/ItemHolder.h"
 #include "KitchenWorker.h"
 
-struct SessionId{
-    SessionId(size_t id) : id(id) {}
-    size_t id;
-};
-
-bool operator==(const SessionId& first, const SessionId& second);
-
-struct SessionIdHash {
-    size_t operator()(const SessionId& sessionId) const;
-};
+typedef size_t SessionId;
 
 class Server : public std::enable_shared_from_this<Server> {
 public:
@@ -33,7 +22,7 @@ public:
         , bying_removing_mutex()
         , itemHolder(itemHolder)
         , kitchenWorker(kitchenWorker)
-        , boughtItems(std::make_shared<std::unordered_map<SessionId, std::unordered_map<ItemId, size_t, ItemIdHash>, SessionIdHash>>()) {}
+        , boughtItems(std::make_shared<std::unordered_map<SessionId, std::unordered_map<ItemId, size_t>>>()) {}
     
     std::future<void> Buy(size_t itemId, size_t itemCount, size_t sessionId);
     std::future<int> Remove(size_t itemId, size_t sessionId);
@@ -47,14 +36,14 @@ public:
     void Stop();
     ~Server();
 
-    std::shared_ptr<std::unordered_map<SessionId, std::unordered_map<ItemId, size_t, ItemIdHash>, SessionIdHash>> GetBoughtItemsTesTing() {
+    std::shared_ptr<std::unordered_map<SessionId, std::unordered_map<ItemId, size_t>>> GetBoughtItemsTesTing() {
         return boughtItems;
     }
 
-private:
+    private:
     boost::asio::thread_pool threadPool;
     std::shared_mutex bying_removing_mutex;
     std::shared_ptr<ItemHolder> itemHolder;
     std::shared_ptr<KitchenWorker> kitchenWorker;
-    std::shared_ptr<std::unordered_map<SessionId, std::unordered_map<ItemId, size_t, ItemIdHash>, SessionIdHash>> boughtItems;  
+    std::shared_ptr<std::unordered_map<SessionId, std::unordered_map<ItemId, size_t>>> boughtItems;  
 };

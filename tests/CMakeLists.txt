@@ -19,7 +19,8 @@ add_executable(
 
 target_link_libraries(${PROJECT_NAME} 
         PUBLIC 
-            ServerLayer
+            ServiceLayer
+            DataLayer
             GTest::gtest_main
         PUBLIC
             ${Boost_LIBRARIES}

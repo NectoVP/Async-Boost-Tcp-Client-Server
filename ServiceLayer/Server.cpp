@@ -1,14 +1,7 @@
-#include "Server.h"
 #include <boost/asio.hpp>
 #include <thread>
 
-bool operator==(const SessionId& first, const SessionId& second) {
-    return first.id == second.id;
-}
-
-size_t SessionIdHash::operator()(const SessionId& sessionId) const {
-    return std::hash<size_t>()(sessionId.id);
-}
+#include "Server.h"
 
 std::future<void> Server::Buy(size_t itemId, size_t itemCount, size_t sessionId) {
     std::future<void> f = boost::asio::post(threadPool,
@@ -82,7 +75,7 @@ std::future<void> Server::MakeOrder(size_t order_sum, size_t sessionId) {
                     return;
                 }
                 for(auto& [itemId, amount]: (*server->boughtItems)[sessionId]) {
-                    (*server->kitchenWorker).MakeProduct(amount * (*server->itemHolder->GetItemsDescription())[itemId.id].cooking_time);
+                    (*server->kitchenWorker).MakeProduct(amount * (*server->itemHolder->GetItemsDescription())[itemId].cooking_time);
                 }
                 shar_lock.unlock();
                 std::unique_lock<std::shared_mutex> uniq_lock(server->bying_removing_mutex);
