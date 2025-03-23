@@ -11,12 +11,14 @@ enable_testing()
 
 add_subdirectory(DataLayer)
 add_subdirectory(ServiceLayer)
+add_subdirectory(ControllerLayer)
 add_subdirectory(tests)
 
 target_link_libraries(${PROJECT_NAME} 
     PUBLIC
         DataLayer
         ServiceLayer
+        ControllerLayer
     PUBLIC
         ${Boost_LIBRARIES}
 )
