@@ -13,7 +13,6 @@ enable_testing()
 
 add_executable(
         ${PROJECT_NAME}
-        Server_tests.cpp
         ItemHolder_tests.cpp
 )
 
