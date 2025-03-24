@@ -64,6 +64,7 @@ std::string path_cat(beast::string_view base, beast::string_view path) {
     result.append(path.data(), path.size());
     return result;
 }
+
 //buy?itemId=1&itemCount=1&sessionId=1
 //remove?itemId=1&itemCount=1&sessionId=1
 //make_order?orderSum=100&sessionId=1
@@ -243,24 +244,26 @@ public:
         auto input = split_str(s);
         
         std::unique_lock<std::mutex> uniq_lock(*server_mutex);
+        
+        std::function<void(std::string&&, std::string&&)> callback = [session = shared_from_this()](std::string&& msg, std::string&& status) {
+            http::response<http::string_body> res{http::status::ok, 10};
+            if(status == "fail")
+                res.result(http::status::bad_request);
+            res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+            res.set(http::field::content_type, "text/html");
+            res.body() = msg;
+            res.prepare_payload();
+            session->send_response(http::message_generator(std::move(res)));
+        };
+
         if(input["method"] == 0) {
-            std::function<void(std::string&&, std::string&&)> buy_callback = [session = shared_from_this()](std::string&& msg, std::string&& status) {
-                http::response<http::string_body> res{http::status::ok, 10};
-                if(status == "fail")
-                    res.result(http::status::bad_request);
-                res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-                res.set(http::field::content_type, "text/html");
-                res.body() = msg;
-                res.prepare_payload();
-                session->send_response(http::message_generator(std::move(res)));
-            };
-            server->Buy(input["itemId"], input["itemCount"], input["sessionId"], std::make_shared<std::function<void(std::string&&, std::string&&)>>(std::move(buy_callback)));
+            server->Buy(input["itemId"], input["itemCount"], input["sessionId"], std::make_shared<std::function<void(std::string&&, std::string&&)>>(std::move(callback)));
         }
         else if(input["method"] == 1) {
-            server->Remove(input["itemId"], input["itemCount"], input["sessionId"]);
+            server->Remove(input["itemId"], input["itemCount"], input["sessionId"], std::make_shared<std::function<void(std::string&&, std::string&&)>>(std::move(callback)));
         }
         else if(input["method"] == 2) {
-            server->MakeOrder(input["orderSum"], input["sessionId"]);
+            server->MakeOrder(input["orderSum"], input["sessionId"], std::make_shared<std::function<void(std::string&&, std::string&&)>>(std::move(callback)));
         }
         uniq_lock.unlock();
         return;
