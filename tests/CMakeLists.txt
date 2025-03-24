@@ -11,16 +11,14 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-add_executable(
-        ${PROJECT_NAME}
-        ItemHolder_tests.cpp
-)
+add_executable(${PROJECT_NAME} ItemHolder_tests.cpp Server_tests.cpp)
 
 target_link_libraries(${PROJECT_NAME} 
-        PUBLIC 
-            ServiceLayer
-            DataLayer
-            GTest::gtest_main
+        PUBLIC
+                DataLayer
+                ServiceLayer
+                ControllerLayer
+                GTest::gtest_main
         PUBLIC
             ${Boost_LIBRARIES}
 )

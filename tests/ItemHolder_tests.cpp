@@ -14,9 +14,9 @@ TEST_F(ItemHolderTest, ItemCount) {
 }
 
 TEST_F(ItemHolderTest, ItemCost) {
-    ASSERT_EQ((*itemHolder->GetItemsDescription())[ItemId(3)].cost, 150);
+    ASSERT_EQ((*itemHolder->GetItemsDescription())[ItemId(3)].cost, 350);
 }
 
 TEST_F(ItemHolderTest, ItemCookingTime) {
-    ASSERT_EQ((*itemHolder->GetItemsDescription())[ItemId(6)].cooking_time, 200);
+    ASSERT_EQ((*itemHolder->GetItemsDescription())[ItemId(6)].cooking_time, 250);
 }

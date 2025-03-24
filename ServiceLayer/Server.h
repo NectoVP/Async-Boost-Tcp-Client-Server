@@ -32,6 +32,11 @@ public:
     std::future<void> MakeOrder(size_t order_sum, size_t sessionId, std::shared_ptr<std::function<void(std::string&&, std::string&&)>>&& callback);
     std::future<void> GetAllItemDescription(std::shared_ptr<std::function<void(std::string&&, std::string&&)>>&& callback);
 
+    std::future<void> TEST_METHOD_Buy(size_t itemId, size_t itemCount, size_t sessionId);
+    std::future<void> TEST_METHOD_Remove(size_t itemId, size_t itemCount, size_t sessionId);
+    std::future<void> TEST_METHOD_MakeOrder(size_t order_sum, size_t sessionId);
+    std::string TEST_METHOD_GetAllItemDescription();
+
     bool CheckOrderCost(size_t order_sum, size_t sessionId, size_t& total_cooking_time);
     void CheckSessionIdSize(size_t sessionId);
 
