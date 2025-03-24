@@ -240,11 +240,27 @@ public:
     void my_handle_request(beast::string_view doc_root, http::request<Body, http::basic_fields<Allocator>>&& req
         , std::shared_ptr<Server>& server, std::shared_ptr<std::mutex>& server_mutex) {
         
-        std::string s = req.target();
-        auto input = split_str(s);
-        
         std::unique_lock<std::mutex> uniq_lock(*server_mutex);
-        
+
+        std::string s = req.target();
+        if(s == "/get") {
+            std::function<void(std::string&&, std::string&&)> get_callback = [session = shared_from_this()](std::string&& msg, std::string&& status) {
+                http::response<http::string_body> res{http::status::ok, 10};
+                if(status == "fail")
+                    res.result(http::status::bad_request);
+                res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+                res.set(http::field::content_type, "text/html");
+                res.body() = msg;
+                res.prepare_payload();
+                session->send_response(http::message_generator(std::move(res)));
+            };
+
+            server->GetAllItemDescription(std::make_shared<std::function<void(std::string&&, std::string&&)>>(std::move(get_callback)));
+            return;
+        }
+
+        auto input = split_str(s);
+
         std::function<void(std::string&&, std::string&&)> callback = [session = shared_from_this()](std::string&& msg, std::string&& status) {
             http::response<http::string_body> res{http::status::ok, 10};
             if(status == "fail")

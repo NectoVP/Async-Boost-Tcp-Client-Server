@@ -30,6 +30,7 @@ public:
     std::future<void> Buy(size_t itemId, size_t itemCount, size_t sessionId, std::shared_ptr<std::function<void(std::string&&, std::string&&)>>&& callback);
     std::future<void> Remove(size_t itemId, size_t itemCount, size_t sessionId, std::shared_ptr<std::function<void(std::string&&, std::string&&)>>&& callback);
     std::future<void> MakeOrder(size_t order_sum, size_t sessionId, std::shared_ptr<std::function<void(std::string&&, std::string&&)>>&& callback);
+    std::future<void> GetAllItemDescription(std::shared_ptr<std::function<void(std::string&&, std::string&&)>>&& callback);
 
     bool CheckOrderCost(size_t order_sum, size_t sessionId, size_t& total_cooking_time);
     void CheckSessionIdSize(size_t sessionId);

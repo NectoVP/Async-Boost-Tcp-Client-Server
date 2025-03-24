@@ -16,7 +16,6 @@ ItemHolder::ItemHolder(const std::string& path) {
     desc_file >> item_desc_json_file;
     json item_amount_json_file;
     amount_file >> item_amount_json_file;
-    
 
     items_description = std::make_shared<std::unordered_map<ItemId, Item>>();
     for(const auto& i : item_desc_json_file) {
@@ -41,6 +40,8 @@ ItemHolder::ItemHolder(const std::string& path) {
         );
     }
     
+    item_description_json = std::make_shared<json>(item_desc_json_file);
+
     desc_file.close();
     amount_file.close();
 }

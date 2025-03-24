@@ -31,8 +31,12 @@ public:
     std::shared_ptr<std::unordered_map<ItemId, size_t>> GetItemsAmount() {
         return items_amount;
     }
+    std::shared_ptr<nlohmann::json> GetRawJson() {
+        return item_description_json;
+    }
 
 private:
     std::shared_ptr<std::unordered_map<ItemId, Item>> items_description;
     std::shared_ptr<std::unordered_map<ItemId, size_t>> items_amount;
+    std::shared_ptr<nlohmann::json> item_description_json;
 };

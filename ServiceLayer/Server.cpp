@@ -100,6 +100,18 @@ std::future<void> Server::MakeOrder(size_t order_sum, size_t sessionId, std::sha
     return f;
 }
 
+std::future<void> Server::GetAllItemDescription(std::shared_ptr<std::function<void(std::string&&, std::string&&)>>&& callback) {
+    std::future<void> f = boost::asio::post(threadPool,
+        std::packaged_task<void()>(
+            [server = shared_from_this(), callback = std::move(callback)]() {
+                (*callback)(server->itemHolder->GetRawJson()->dump(), "ok");
+            }
+        )
+    );
+    return f;
+}
+
+
 bool Server::CheckOrderCost(size_t order_sum, size_t sessionId, size_t& total_cooking_time) {
     size_t temp_sum = 0;
     auto item_costs = itemHolder->GetItemsDescription();
