@@ -5,7 +5,7 @@ constexpr bool DEBUG_PRINT = false;
 
 #include "Server.h"
 
-std::future<void> Server::Buy(size_t itemId, size_t itemCount, size_t sessionId) {
+std::future<void> Server::Buy(size_t itemId, size_t itemCount, size_t sessionId, std::shared_ptr<std::function<void(std::string&&, std::string&&)>>&& callback) {
     CheckSessionIdSize(sessionId);
     std::shared_lock<std::shared_mutex> temp_lock(resize_atomics_mutex);
     ++(*allAtomicsCount)[sessionId];
@@ -13,14 +13,17 @@ std::future<void> Server::Buy(size_t itemId, size_t itemCount, size_t sessionId)
 
     std::future<void> f = boost::asio::post(threadPool,
         std::packaged_task<void()>(
-            [server = shared_from_this(), itemId, itemCount, sessionId]() {
+            [server = shared_from_this(), itemId, itemCount, sessionId, callback = std::move(callback)]() {
                 std::unique_lock<std::mutex> uniq_lock(server->bying_removing_mutex);
                 if(DEBUG_PRINT) std::cout << "buy method: " << itemId << ' ' << sessionId << std::endl;
                 if((*server->itemHolder->GetItemsAmount())[itemId] >= itemCount) {
                     (*server->itemHolder->GetItemsAmount())[itemId] -= itemCount;
                     (*server->boughtItems)[sessionId][itemId] += itemCount;
+                
+                    (*callback)("item was bought correctly", "ok");
                 } else {
-                    std::cout << "you cannot buy so many items";
+                    if(DEBUG_PRINT) std::cout << "you cannot buy so many items";
+                    (*callback)("you cannot buy so many items", "fail");
                 }
                 std::shared_lock<std::shared_mutex> shar_lock(server->resize_atomics_mutex);
                 --(*server->allAtomicsCount)[sessionId];
@@ -29,7 +32,7 @@ std::future<void> Server::Buy(size_t itemId, size_t itemCount, size_t sessionId)
                     (*server->allAtomicsBools)[sessionId] = true;
                     (*server->allAtomicsBools)[sessionId].notify_all();
                 }
-               return;
+                return;
            }
        )
     );

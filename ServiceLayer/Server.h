@@ -27,7 +27,7 @@ public:
         , kitchenWorker(kitchenWorker)
         , boughtItems(std::make_shared<std::unordered_map<SessionId, std::unordered_map<ItemId, size_t>>>()) {}
     
-    std::future<void> Buy(size_t itemId, size_t itemCount, size_t sessionId);
+    std::future<void> Buy(size_t itemId, size_t itemCount, size_t sessionId, std::shared_ptr<std::function<void(std::string&&, std::string&&)>>&& callback);
     std::future<void> Remove(size_t itemId, size_t itemCount, size_t sessionId);
     std::future<void> MakeOrder(size_t order_sum, size_t sessionId);
 
