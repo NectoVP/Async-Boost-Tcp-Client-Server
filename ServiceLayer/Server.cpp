@@ -5,13 +5,13 @@ constexpr bool DEBUG_PRINT = false;
 
 #include "Server.h"
 
-std::future<void> Server::Buy(size_t itemId, size_t itemCount, size_t sessionId, std::shared_ptr<std::function<void(std::string&&, std::string&&)>>&& callback) {
+std::future<void> Server::Buy(size_t itemId, size_t itemCount, size_t sessionId, std::function<void(std::string&&, std::string&&)>&& callback) {
     CheckSessionIdSize(sessionId);
     std::shared_lock<std::shared_mutex> temp_lock(resize_atomics_mutex);
     ++(*allAtomicsCount)[sessionId];
     temp_lock.unlock();
 
-    std::future<void> f = boost::asio::post(threadPool,
+    std::future<void> f = boost::asio::post(mainThreadPool,
         std::packaged_task<void()>(
             [server = shared_from_this(), itemId, itemCount, sessionId, callback = std::move(callback)]() {
                 std::unique_lock<std::mutex> uniq_lock(server->bying_removing_mutex);
@@ -20,10 +20,10 @@ std::future<void> Server::Buy(size_t itemId, size_t itemCount, size_t sessionId,
                     (*server->itemHolder->GetItemsAmount())[itemId] -= itemCount;
                     (*server->boughtItems)[sessionId][itemId] += itemCount;
                 
-                    (*callback)("item was bought correctly", "ok");
+                    callback("item was bought correctly", "ok");
                 } else {
                     if(DEBUG_PRINT) std::cout << "you cannot buy so many items";
-                    (*callback)("you cannot buy so many items", "fail");
+                    callback("you cannot buy this many items", "internal_error");
                 }
                 std::shared_lock<std::shared_mutex> shar_lock(server->resize_atomics_mutex);
                 --(*server->allAtomicsCount)[sessionId];
@@ -39,13 +39,13 @@ std::future<void> Server::Buy(size_t itemId, size_t itemCount, size_t sessionId,
     return f;
 }
 
-std::future<void> Server::Remove(size_t itemId, size_t itemCount, size_t sessionId, std::shared_ptr<std::function<void(std::string&&, std::string&&)>>&& callback) {
+std::future<void> Server::Remove(size_t itemId, size_t itemCount, size_t sessionId, std::function<void(std::string&&, std::string&&)>&& callback) {
     CheckSessionIdSize(sessionId);
     std::shared_lock<std::shared_mutex> temp_lock(resize_atomics_mutex);
     ++(*allAtomicsCount)[sessionId];
     temp_lock.unlock();
 
-    std::future<void> f = boost::asio::post(threadPool,
+    std::future<void> f = boost::asio::post(mainThreadPool,
         std::packaged_task<void()>(
             [server = shared_from_this(), itemId, itemCount, sessionId, callback = std::move(callback)]() {
                 std::unique_lock<std::mutex> uniq_lock(server->bying_removing_mutex);
@@ -62,7 +62,7 @@ std::future<void> Server::Remove(size_t itemId, size_t itemCount, size_t session
                     (*server->allAtomicsBools)[sessionId].notify_all();
                 }
                 
-                (*callback)("item was removed correctly", "ok");
+                callback("item was removed correctly", "ok");
                 return;
             }
         )
@@ -70,10 +70,10 @@ std::future<void> Server::Remove(size_t itemId, size_t itemCount, size_t session
     return f;
 }
 
-std::future<void> Server::MakeOrder(size_t order_sum, size_t sessionId, std::shared_ptr<std::function<void(std::string&&, std::string&&)>>&& callback) {
+std::future<void> Server::MakeOrder(size_t order_sum, size_t sessionId, std::function<void(std::string&&, std::string&&)>&& callback) {
     if(DEBUG_PRINT) std::cout << "tut";
     CheckSessionIdSize(sessionId);
-    std::future<void> f = boost::asio::post(threadPool,
+    std::future<void> f = boost::asio::post(makeOrderThreadPool,
         std::packaged_task<void()>(
             [server = shared_from_this(), order_sum, sessionId, callback = std::move(callback)]() {
                 std::shared_lock<std::shared_mutex> temp_lock(server->resize_atomics_mutex);
@@ -84,14 +84,14 @@ std::future<void> Server::MakeOrder(size_t order_sum, size_t sessionId, std::sha
                 std::unique_lock<std::mutex> uniq_lock(server->bying_removing_mutex);
                 size_t total_cooking_time = 0;
                 if(!server->CheckOrderCost(order_sum, sessionId, total_cooking_time)) {
-                    std::cout << "payment provided is not sufficient " << order_sum << " " << sessionId << '\n';
-                    (*callback)("payment provided is not sufficient " + std::to_string(order_sum) + " " + std::to_string(sessionId), "fail");
+                    if(DEBUG_PRINT) std::cout << "payment provided is not sufficient " << order_sum << " " << sessionId << '\n';
+                    callback("payment provided is not sufficient " + std::to_string(order_sum) + " " + std::to_string(sessionId), "payment_failure");
                     return;
                 }
                 (*server->boughtItems).erase(sessionId);
                 uniq_lock.unlock();
                 (*server->kitchenWorker).MakeProduct(total_cooking_time);
-                (*callback)("order " + std::to_string(sessionId) + " is ready", "ok");
+                callback("order " + std::to_string(sessionId) + " is ready", "ok");
                 
                 std::cout << "order " << sessionId << " is ready\n";
             }
@@ -100,112 +100,17 @@ std::future<void> Server::MakeOrder(size_t order_sum, size_t sessionId, std::sha
     return f;
 }
 
-std::future<void> Server::GetAllItemDescription(std::shared_ptr<std::function<void(std::string&&, std::string&&)>>&& callback) {
-    std::future<void> f = boost::asio::post(threadPool,
+std::future<void> Server::GetAllItemDescription(std::function<void(std::string&&, std::string&&)>&& callback) {
+    std::future<void> f = boost::asio::post(mainThreadPool,
         std::packaged_task<void()>(
             [server = shared_from_this(), callback = std::move(callback)]() {
-                (*callback)(server->itemHolder->GetRawJson()->dump(), "ok");
+                callback(std::string(*server->itemHolder->GetStringJson()), "ok");
             }
         )
     );
     return f;
 }
 
-
-std::future<void> Server::TEST_METHOD_Buy(size_t itemId, size_t itemCount, size_t sessionId) {
-    CheckSessionIdSize(sessionId);
-    std::shared_lock<std::shared_mutex> temp_lock(resize_atomics_mutex);
-    ++(*allAtomicsCount)[sessionId];
-    temp_lock.unlock();
-
-    std::future<void> f = boost::asio::post(threadPool,
-        std::packaged_task<void()>(
-            [server = shared_from_this(), itemId, itemCount, sessionId]() {
-                std::unique_lock<std::mutex> uniq_lock(server->bying_removing_mutex);
-                if(DEBUG_PRINT) std::cout << "buy method: " << itemId << ' ' << sessionId << std::endl;
-                if((*server->itemHolder->GetItemsAmount())[itemId] >= itemCount) {
-                    (*server->itemHolder->GetItemsAmount())[itemId] -= itemCount;
-                    (*server->boughtItems)[sessionId][itemId] += itemCount;
-                
-                } else {
-                    if(DEBUG_PRINT) std::cout << "you cannot buy so many items";
-                }
-                std::shared_lock<std::shared_mutex> shar_lock(server->resize_atomics_mutex);
-                --(*server->allAtomicsCount)[sessionId];
-                if ((*server->allAtomicsCount)[sessionId].load() == 0)
-                {
-                    (*server->allAtomicsBools)[sessionId] = true;
-                    (*server->allAtomicsBools)[sessionId].notify_all();
-                }
-                return;
-           }
-       )
-    );
-    return f;
-}
-
-std::future<void> Server::TEST_METHOD_Remove(size_t itemId, size_t itemCount, size_t sessionId) {
-    CheckSessionIdSize(sessionId);
-    std::shared_lock<std::shared_mutex> temp_lock(resize_atomics_mutex);
-    ++(*allAtomicsCount)[sessionId];
-    temp_lock.unlock();
-
-    std::future<void> f = boost::asio::post(threadPool,
-        std::packaged_task<void()>(
-            [server = shared_from_this(), itemId, itemCount, sessionId]() {
-                std::unique_lock<std::mutex> uniq_lock(server->bying_removing_mutex);
-                if(DEBUG_PRINT) std::cout << "remove method: " << itemId << ' ' << sessionId << std::endl;
-                
-                (*server->itemHolder->GetItemsAmount())[itemId] += itemCount;
-                (*server->boughtItems)[sessionId][itemId] -= itemCount;
-                
-                std::shared_lock<std::shared_mutex> shar_lock(server->resize_atomics_mutex);
-                --(*server->allAtomicsCount)[sessionId];
-                if ((*server->allAtomicsCount)[sessionId].load() == 0)
-                {
-                    (*server->allAtomicsBools)[sessionId] = true;
-                    (*server->allAtomicsBools)[sessionId].notify_all();
-                }
-                
-                return;
-            }
-        )
-    );
-    return f;
-}
-
-std::future<void> Server::TEST_METHOD_MakeOrder(size_t order_sum, size_t sessionId) {
-    if(DEBUG_PRINT) std::cout << "tut";
-    CheckSessionIdSize(sessionId);
-    std::future<void> f = boost::asio::post(threadPool,
-        std::packaged_task<void()>(
-            [server = shared_from_this(), order_sum, sessionId]() {
-                std::shared_lock<std::shared_mutex> temp_lock(server->resize_atomics_mutex);
-                (*server->allAtomicsBools)[sessionId].wait(false);
-                temp_lock.unlock();
-                if(DEBUG_PRINT) std::cout << "make method " << (*server->allAtomicsBools)[sessionId].load() << ' ' << sessionId << std::endl;
-                
-                std::unique_lock<std::mutex> uniq_lock(server->bying_removing_mutex);
-                size_t total_cooking_time = 0;
-                if(!server->CheckOrderCost(order_sum, sessionId, total_cooking_time)) {
-                    std::cout << "payment provided is not sufficient " << order_sum << " " << sessionId << '\n';
-                    return;
-                }
-                (*server->boughtItems).erase(sessionId);
-                uniq_lock.unlock();
-                (*server->kitchenWorker).MakeProduct(total_cooking_time);
-                
-                std::cout << "order " << sessionId << " is ready\n";
-            }
-        )
-    );
-    return f;
-}
-
-std::string Server::TEST_METHOD_GetAllItemDescription() {
-    if(DEBUG_PRINT) std::cout << itemHolder->GetRawJson()->dump();
-    return itemHolder->GetRawJson()->dump();
-}
 
 bool Server::CheckOrderCost(size_t order_sum, size_t sessionId, size_t& total_cooking_time) {
     size_t temp_sum = 0;
@@ -232,17 +137,21 @@ void Server::CheckSessionIdSize(size_t sessionId) {
 } 
 
 void Server::Wait(){
-    threadPool.wait();
+    makeOrderThreadPool.wait();
+    mainThreadPool.wait();
 }
 
 void Server::Join(){
-    threadPool.join();
+    makeOrderThreadPool.join();
+    mainThreadPool.join();
 }
 
 void Server::Stop(){
-    threadPool.stop();
+    makeOrderThreadPool.stop();
+    mainThreadPool.stop();
 }
 
 Server::~Server() {
-    threadPool.stop();
+    makeOrderThreadPool.stop();
+    mainThreadPool.stop();
 }

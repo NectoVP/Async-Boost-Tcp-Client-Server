@@ -18,7 +18,8 @@ typedef size_t SessionId;
 class Server : public std::enable_shared_from_this<Server> {
 public:
     Server(const size_t maxUsers, const std::shared_ptr<ItemHolder>& itemHolder, const std::shared_ptr<KitchenWorker>& kitchenWorker) : 
-        threadPool(std::thread::hardware_concurrency())
+        mainThreadPool(std::thread::hardware_concurrency())
+        , makeOrderThreadPool(std::thread::hardware_concurrency())
         , bying_removing_mutex()
         , resize_atomics_mutex()
         , allAtomicsCount(std::make_shared<std::vector<std::atomic<size_t>>>(maxUsers))
@@ -27,30 +28,26 @@ public:
         , kitchenWorker(kitchenWorker)
         , boughtItems(std::make_shared<std::unordered_map<SessionId, std::unordered_map<ItemId, size_t>>>()) {}
     
-    std::future<void> Buy(size_t itemId, size_t itemCount, size_t sessionId, std::shared_ptr<std::function<void(std::string&&, std::string&&)>>&& callback);
-    std::future<void> Remove(size_t itemId, size_t itemCount, size_t sessionId, std::shared_ptr<std::function<void(std::string&&, std::string&&)>>&& callback);
-    std::future<void> MakeOrder(size_t order_sum, size_t sessionId, std::shared_ptr<std::function<void(std::string&&, std::string&&)>>&& callback);
-    std::future<void> GetAllItemDescription(std::shared_ptr<std::function<void(std::string&&, std::string&&)>>&& callback);
-
-    std::future<void> TEST_METHOD_Buy(size_t itemId, size_t itemCount, size_t sessionId);
-    std::future<void> TEST_METHOD_Remove(size_t itemId, size_t itemCount, size_t sessionId);
-    std::future<void> TEST_METHOD_MakeOrder(size_t order_sum, size_t sessionId);
-    std::string TEST_METHOD_GetAllItemDescription();
-
-    bool CheckOrderCost(size_t order_sum, size_t sessionId, size_t& total_cooking_time);
-    void CheckSessionIdSize(size_t sessionId);
+    std::future<void> Buy(size_t itemId, size_t itemCount, size_t sessionId, std::function<void(std::string&&, std::string&&)>&& callback);
+    std::future<void> Remove(size_t itemId, size_t itemCount, size_t sessionId, std::function<void(std::string&&, std::string&&)>&& callback);
+    std::future<void> MakeOrder(size_t order_sum, size_t sessionId, std::function<void(std::string&&, std::string&&)>&& callback);
+    std::future<void> GetAllItemDescription(std::function<void(std::string&&, std::string&&)>&& callback);
 
     void Wait();
     void Join();
     void Stop();
     ~Server();
 
-    std::shared_ptr<std::unordered_map<SessionId, std::unordered_map<ItemId, size_t>>> GetBoughtItemsTesTing() {
+    std::shared_ptr<std::unordered_map<SessionId, std::unordered_map<ItemId, size_t>>> TEST_METHOD_GET_BOUGHT_ITEMS() {
         return boughtItems;
     }
 
 private:
-    boost::asio::thread_pool threadPool;
+    bool CheckOrderCost(size_t order_sum, size_t sessionId, size_t& total_cooking_time);
+    void CheckSessionIdSize(size_t sessionId);
+
+    boost::asio::thread_pool mainThreadPool;
+    boost::asio::thread_pool makeOrderThreadPool;
     std::mutex bying_removing_mutex;
     std::shared_mutex resize_atomics_mutex;
     std::shared_ptr<std::vector<std::atomic<size_t>>> allAtomicsCount;

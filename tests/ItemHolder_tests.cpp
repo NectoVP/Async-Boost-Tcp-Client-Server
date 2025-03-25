@@ -9,14 +9,22 @@ struct ItemHolderTest : public testing::Test {
     std::shared_ptr<ItemHolder> itemHolder;
 };
 
-TEST_F(ItemHolderTest, ItemCount) {
+TEST_F(ItemHolderTest, ItemDescCount) {
     ASSERT_EQ(itemHolder->GetItemsDescription()->size(), 20);
 }
 
-TEST_F(ItemHolderTest, ItemCost) {
+TEST_F(ItemHolderTest, ItemDescCost) {
     ASSERT_EQ((*itemHolder->GetItemsDescription())[ItemId(3)].cost, 350);
 }
 
-TEST_F(ItemHolderTest, ItemCookingTime) {
+TEST_F(ItemHolderTest, ItemDescCookingTime) {
     ASSERT_EQ((*itemHolder->GetItemsDescription())[ItemId(6)].cooking_time, 250);
+}
+
+TEST_F(ItemHolderTest, ItemAmountCount) {
+    ASSERT_EQ(itemHolder->GetItemsAmount()->size(), 20);
+}
+
+TEST_F(ItemHolderTest, ItemAmountInitialValue) {
+    ASSERT_EQ((*itemHolder->GetItemsAmount())[ItemId(4)], 10);
 }

@@ -2,8 +2,14 @@ cmake_minimum_required(VERSION 3.10)
 project(ControllerLayer)
 
 add_library(${PROJECT_NAME}
-    TcpServer.h
-    TcpServer.cpp
+    ErrorHandler.h
+    ErrorHandler.cpp
+    Listener.h
+    Listener.cpp
+    Session.h
+    Session.cpp
+    RequestHandler.h
+    RequestHandler.cpp
 )
 
 find_package(Boost REQUIRED COMPONENTS system filesystem)

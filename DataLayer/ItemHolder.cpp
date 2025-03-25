@@ -40,7 +40,7 @@ ItemHolder::ItemHolder(const std::string& path) {
         );
     }
     
-    item_description_json = std::make_shared<json>(item_desc_json_file);
+    item_description_json = std::make_shared<std::string>(item_desc_json_file.dump());
 
     desc_file.close();
     amount_file.close();
