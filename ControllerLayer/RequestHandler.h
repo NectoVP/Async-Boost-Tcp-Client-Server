@@ -84,7 +84,9 @@ public:
                 not_found(target);
             return;
         }
-
+        //std::cout <<"\ntut\n" << std::string(req.body()) << ' ' << 
+        //    std::string(req.target()) << std::endl << req << std::endl;
+        
         nlohmann::json js = nlohmann::json::parse(std::string(req.body()));
         if(!check_params(js)) {
             invalid_params("invalid body parameters");
@@ -100,8 +102,9 @@ public:
                 not_found(target);
             return;
         }
-
+        std::cout << std::string(req.body());
         if(req.method() == http::verb::delete_) {
+            std::cout << std::string(req.body());
             if(target == "/remove")
                 server->Remove(js["id"].template get<size_t>(), js["count"].template get<size_t>(), js["sessionId"].template get<size_t>(), std::move(callback));
             else

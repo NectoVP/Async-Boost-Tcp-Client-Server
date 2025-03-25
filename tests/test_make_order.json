@@ -1,0 +1,14 @@
+[
+    {
+        "order_sum": 100,
+        "sessionId": 1
+    },
+    {
+        "order_sum": 150,
+        "sessionId": 1
+    },
+    {
+        "order_sum": 100,
+        "sessionId": 4
+    }
+]

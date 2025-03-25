@@ -1,0 +1,22 @@
+[
+    {
+        "id": 1,
+        "count": 1,
+        "sessionId": 1
+    },
+    {
+        "id": 3,
+        "count": 2,
+        "sessionId": 1
+    },
+    {
+        "id": 1,
+        "count": 1,
+        "sessionId": 4
+    },
+    {
+        "id": 1,
+        "count": 100,
+        "sessionId": 5
+    }
+]

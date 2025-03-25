@@ -11,7 +11,7 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-add_executable(${PROJECT_NAME} ItemHolder_tests.cpp Server_tests.cpp)
+add_executable(${PROJECT_NAME} ItemHolder_tests.cpp Server_tests.cpp Net_tests.cpp)
 
 target_link_libraries(${PROJECT_NAME} 
         PUBLIC
