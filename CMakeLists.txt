@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25.0)
-project(MyServerr)
+project(TcpServer)
 set(CMAKE_CXX_STANDARD 23)
 
 find_package(Boost 1.83.0 REQUIRED COMPONENTS filesystem system thread chrono)
