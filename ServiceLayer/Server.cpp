@@ -116,6 +116,8 @@ bool Server::CheckOrderCost(size_t order_sum, size_t sessionId, size_t& total_co
     size_t temp_sum = 0;
     auto item_costs = itemHolder->GetItemsDescription();
     for(auto& [itemId, amount]: (*boughtItems)[sessionId]) {
+        if(amount <= 0)
+            continue;
         temp_sum += (*item_costs)[itemId].cost * amount;
         total_cooking_time += amount * (*itemHolder->GetItemsDescription())[itemId].cooking_time;
     }
