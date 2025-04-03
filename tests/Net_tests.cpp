@@ -70,9 +70,9 @@ public:
         remove_file >> remove_json;
         make_order_file >> make_order_json;
 
-        //buy_file.close();
-        //remove_file.close();
-        //make_order_file.close();
+        buy_file.close();
+        remove_file.close();
+        make_order_file.close();
     }
 
     void run(char const* host, char const* port, char const* target, char const* type, int version, int idx) {
