@@ -227,7 +227,7 @@ TEST_F(ClientTest, BuyTooManyItems) {
     auto client(std::make_shared<Client>(ioc));
     client->run(host, port, "/buy", "buy", 10, 3);
     ioc.run();
-    ASSERT_EQ(client->helper->body, "you cannot buy this many items");
+    ASSERT_EQ(client->helper->body, "you cannot buy this many items :1");
     ASSERT_EQ(client->helper->status, "500");
 }
 

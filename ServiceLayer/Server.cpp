@@ -22,8 +22,8 @@ std::future<void> Server::Buy(size_t itemId, size_t itemCount, size_t sessionId,
                 
                     callback("item was bought correctly", "ok");
                 } else {
-                    if(DEBUG_PRINT) std::cout << "you cannot buy so many items";
-                    callback("you cannot buy this many items", "internal_error");
+                    if(DEBUG_PRINT) std::cout << "you cannot buy so many items.";
+                    callback("you cannot buy this many items :" + std::to_string(itemId), "internal_error");
                 }
                 std::shared_lock<std::shared_mutex> shar_lock(server->resize_atomics_mutex);
                 --(*server->allAtomicsCount)[sessionId];
@@ -53,7 +53,6 @@ std::future<void> Server::Remove(size_t itemId, size_t itemCount, size_t session
                 
                 (*server->itemHolder->GetItemsAmount())[itemId] += itemCount;
                 (*server->boughtItems)[sessionId][itemId] -= itemCount;
-                
                 std::shared_lock<std::shared_mutex> shar_lock(server->resize_atomics_mutex);
                 --(*server->allAtomicsCount)[sessionId];
                 if ((*server->allAtomicsCount)[sessionId].load() == 0)

@@ -73,6 +73,7 @@ public:
             res.prepare_payload();
             send_response(http::message_generator(std::move(res)));
         };
+        std::cout << req.method() << req.body() << std::endl;
 
         std::string target = req.target();
         std::unique_lock<std::mutex> uniq_lock(*server_mutex);
@@ -86,6 +87,7 @@ public:
         }
         //std::cout <<"\ntut\n" << std::string(req.body()) << ' ' << 
         //    std::string(req.target()) << std::endl << req << std::endl;
+        
         
         nlohmann::json js = nlohmann::json::parse(std::string(req.body()));
         if(!check_params(js)) {

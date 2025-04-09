@@ -24,7 +24,9 @@ int main(int argc, char* argv[])
 {
     std::string path = "/home/nectovp/Code/cpp/mpp/";
 
-    auto itemHolder = std::make_shared<ItemHolder>(path);
+    auto const prod = true;
+
+    auto itemHolder = std::make_shared<ItemHolder>(path, prod);
     auto kitchenWorker = std::make_shared<KitchenWorker>();
     std::shared_ptr<Server> server = std::make_shared<Server>(100, itemHolder, kitchenWorker);
     
@@ -63,3 +65,5 @@ int main(int argc, char* argv[])
 
     return EXIT_SUCCESS;
 }
+
+//переводы, тесты

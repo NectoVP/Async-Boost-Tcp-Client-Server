@@ -2,12 +2,14 @@
 
 using json = nlohmann::json;
 
-ItemHolder::ItemHolder(const std::string& path) {
-    std::ifstream desc_file(path + "DataLayer/items_desc.json");
+ItemHolder::ItemHolder(const std::string& path, bool prod) {
+    this->prod = prod;
+    
+    std::ifstream desc_file(path + "DataLayer/items_desc" + (prod == true ? "_prod" : "") + ".json" );
     if(!desc_file.is_open()) {
         std::cout << "file with items description was not opened";
     }
-    std::ifstream amount_file(path + "DataLayer/items_initial_count.json");
+    std::ifstream amount_file(path + "DataLayer/items_initial_count" + (prod == true ? "_prod" : "") + ".json" );
     if(!amount_file.is_open()) {
         std::cout << "file with items description was not opened";
     }
