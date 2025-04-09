@@ -23,7 +23,7 @@ struct Item {
 
 class ItemHolder {
 public:
-    ItemHolder(const std::string& path, bool prod = false);
+    ItemHolder(const std::string& path, const std::string& locale, bool prod = false);
 
     std::shared_ptr<std::unordered_map<ItemId, Item>> GetItemsDescription() {
         return items_description;
@@ -41,4 +41,5 @@ private:
     std::shared_ptr<std::string> item_description_json;
 
     bool prod;
+    std::string locale;
 };

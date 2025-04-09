@@ -2,8 +2,9 @@
 
 using json = nlohmann::json;
 
-ItemHolder::ItemHolder(const std::string& path, bool prod) {
+ItemHolder::ItemHolder(const std::string& path, const std::string& locale, bool prod) {
     this->prod = prod;
+    this->locale = locale;
     
     std::ifstream desc_file(path + "DataLayer/items_desc" + (prod == true ? "_prod" : "") + ".json" );
     if(!desc_file.is_open()) {
@@ -26,7 +27,7 @@ ItemHolder::ItemHolder(const std::string& path, bool prod) {
             Item(
                 i["cost"].template get<size_t>(), 
                 i["cooking_time"].template get<size_t>(), 
-                i["name"].template get<std::string>(),
+                i[locale + "_name"].template get<std::string>(),
                 i["pic_url"].template get<std::string>()
             )
             }
