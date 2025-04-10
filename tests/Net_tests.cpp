@@ -210,7 +210,7 @@ TEST_F(ClientTest, GetDesc) {
     auto client(std::make_shared<Client>(ioc));
     client->run(host, port, "/get_description", "get", 10, 0);
     ioc.run();
-    ASSERT_EQ(client->helper->body.size(), 1472);
+    ASSERT_EQ(client->helper->body.size(), 5499);
     ASSERT_EQ(client->helper->status, "200");
 }
 

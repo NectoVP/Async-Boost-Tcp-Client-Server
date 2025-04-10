@@ -23,7 +23,7 @@ struct ServerTest : public testing::Test {
     ServerTest() {
         std::string path = "/home/nectovp/Code/cpp/mpp/";
 
-        auto itemHolder = std::make_shared<ItemHolder>(path);
+        auto itemHolder = std::make_shared<ItemHolder>(path, "en");
         auto kitchenWorker = std::make_shared<KitchenWorker>();
         server = std::make_shared<Server>(100, itemHolder, kitchenWorker);
     }
@@ -51,8 +51,8 @@ TEST_F(ServerTest, AsynchronyTest) {
         "remove 2 1 1",
         "buy 2 1 2",
         "buy 3 1 1",
-        "pay 450 2",
-        "pay 450 1",
+        "pay 520 2",
+        "pay 1130 1",
     };
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -151,7 +151,7 @@ TEST_F(ServerTest, MakingOrderSingleClient) {
     auto a = server->Buy(1, 1, 1, std::move(temp_callback));
     a.wait();
     auto test_ptr = std::make_shared<HelperTestClass>();
-    auto b = server->MakeOrder(100, 1, std::bind(&HelperTestClass::callback_with_save, test_ptr, std::placeholders::_1, std::placeholders::_2));
+    auto b = server->MakeOrder(730, 1, std::bind(&HelperTestClass::callback_with_save, test_ptr, std::placeholders::_1, std::placeholders::_2));
     b.wait();
         
     ASSERT_EQ(server->TEST_METHOD_GET_BOUGHT_ITEMS()->size(), 0);
@@ -168,13 +168,13 @@ TEST_F(ServerTest, MakingOrderMultipleClients) {
     b.wait();
     
     auto test_ptr = std::make_shared<HelperTestClass>();
-    auto c = server->MakeOrder(300, 1, std::bind(&HelperTestClass::callback_with_save, test_ptr, std::placeholders::_1, std::placeholders::_2));
+    auto c = server->MakeOrder(2190, 1, std::bind(&HelperTestClass::callback_with_save, test_ptr, std::placeholders::_1, std::placeholders::_2));
     c.wait();
     ASSERT_EQ(test_ptr->msg, "order 1 is ready");
     ASSERT_EQ(test_ptr->status, "ok");
     ASSERT_EQ(server->TEST_METHOD_GET_BOUGHT_ITEMS()->size(), 1);
     
-    auto d = server->MakeOrder(450, 2, std::bind(&HelperTestClass::callback_with_save, test_ptr, std::placeholders::_1, std::placeholders::_2));
+    auto d = server->MakeOrder(520, 2, std::bind(&HelperTestClass::callback_with_save, test_ptr, std::placeholders::_1, std::placeholders::_2));
     d.wait();
     ASSERT_EQ(server->TEST_METHOD_GET_BOUGHT_ITEMS()->size(), 0);
     ASSERT_EQ(test_ptr->msg, "order 2 is ready");
